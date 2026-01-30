@@ -1,3 +1,25 @@
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+
+# Virtual environments
+venv/
+env/
+
+# Editor folders
+.history/
+.vscode/
+
+# OS files
+Thumbs.db
+.DS_Store
+
+# Environment
+.env
+
+# Node
+node_modules/
+**/package-lock.json
 # Dependencies
 node_modules/
 __pycache__/
