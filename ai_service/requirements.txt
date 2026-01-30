@@ -5,3 +5,5 @@ scikit-learn
 joblib
 psycopg2-binary
 scipy
+Pillow
+piexif
