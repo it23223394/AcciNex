@@ -5,7 +5,88 @@ import {
 } from 'recharts';
 import styles from './Dashboard.module.css';
 
+const LoginPage = ({ onLogin }) => {
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState('');
+
+  const handleLogin = async (e) => {
+    e.preventDefault();
+    setIsLoading(true);
+    setError('');
+    
+    try {
+      const response = await fetch('http://localhost:3000/api/auth/login', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email, password })
+      });
+
+      if (!response.ok) {
+        setError('Invalid email or password');
+        return;
+      }
+
+      const data = await response.json();
+      localStorage.setItem('token', data.token);
+      localStorage.setItem('user', JSON.stringify(data.user));
+      onLogin();
+    } catch (err) {
+      setError('Error logging in: ' + err.message);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  return (
+    <div className={styles.dashboardContainer}>
+      <div className={styles.loginContainer}>
+        <div className={styles.loginBox}>
+          <h1 className={styles.loginTitle}>🚔 AcciNex</h1>
+          <p className={styles.loginSubtitle}>Road Safety Intelligence Platform</p>
+          
+          <form onSubmit={handleLogin} className={styles.loginForm}>
+            <div className={styles.formGroup}>
+              <label className={styles.formLabel}>Email</label>
+              <input
+                className={styles.formInput}
+                type="email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                placeholder="Enter your email"
+                required
+              />
+            </div>
+
+            <div className={styles.formGroup}>
+              <label className={styles.formLabel}>Password</label>
+              <input
+                className={styles.formInput}
+                type="password"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                placeholder="Enter your password"
+                required
+              />
+            </div>
+
+            {error && <div className={styles.alertDanger} style={{ marginBottom: '16px' }}>{error}</div>}
+
+            <button type="submit" className={styles.submitButton} disabled={isLoading}>
+              {isLoading ? '🔐 Logging in...' : '🔐 Login'}
+            </button>
+          </form>
+
+          <p className={styles.loginHint}>Demo: Use test@example.com / password123</p>
+        </div>
+      </div>
+    </div>
+  );
+};
+
 const AuthorityDashboard = () => {
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [activeTab, setActiveTab] = useState('overview');
   const [reports, setReports] = useState([]);
   const [hotspots, setHotspots] = useState([]);
@@ -41,9 +122,13 @@ const AuthorityDashboard = () => {
   });
 
   useEffect(() => {
-    fetchReports();
-    fetchHotspots();
-    fetchAlerts();
+    const token = localStorage.getItem('token');
+    if (token) {
+      setIsLoggedIn(true);
+      fetchReports();
+      fetchHotspots();
+      fetchAlerts();
+    }
   }, []);
 
   const fetchReports = async () => {
@@ -209,7 +294,11 @@ const AuthorityDashboard = () => {
   );
 
   return (
-    <div className={styles.dashboardContainer}>
+    <>
+      {!isLoggedIn ? (
+        <LoginPage onLogin={() => setIsLoggedIn(true)} />
+      ) : (
+        <div className={styles.dashboardContainer}>
       {/* Header Section */}
       <header className={styles.headerSection}>
         <h1 className={styles.mainTitle}>🚔 AcciNex – Authority Dashboard</h1>
@@ -576,7 +665,9 @@ const AuthorityDashboard = () => {
       <footer className={styles.footer}>
         <p className={styles.footerText}>AcciNex - Predict, Prevent, Protect | Backend: 3000 | AI: 5000 | Dashboard: 3001</p>
       </footer>
-    </div>
+        </div>
+      )}
+    </>
   );
 };
 

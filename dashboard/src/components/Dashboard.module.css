@@ -33,6 +33,60 @@
 }
 
 /* ========================================
+   LOGIN PAGE STYLES
+   ======================================== */
+
+.loginContainer {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 100vh;
+}
+
+.loginBox {
+  background: linear-gradient(135deg, #1e3a52 0%, #162a3f 100%);
+  border-radius: 12px;
+  padding: 48px;
+  border: 1px solid rgba(96, 165, 250, 0.2);
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+  width: 100%;
+  max-width: 400px;
+  animation: fadeInDown 0.5s ease-out;
+}
+
+.loginTitle {
+  font-size: 36px;
+  font-weight: 700;
+  margin: 0 0 8px 0;
+  background: linear-gradient(135deg, #60a5fa 0%, #06b6d4 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  text-align: center;
+}
+
+.loginSubtitle {
+  font-size: 14px;
+  color: #a8b4c8;
+  margin: 0 0 32px 0;
+  text-align: center;
+}
+
+.loginForm {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  margin-bottom: 24px;
+}
+
+.loginHint {
+  font-size: 12px;
+  color: #a8b4c8;
+  text-align: center;
+  margin: 0;
+}
+
+/* ========================================
    TYPOGRAPHY & HIERARCHY
    ======================================== */
 
@@ -136,14 +190,14 @@
   gap: 8px;
   margin-top: 12px;
   font-size: 12px;
-  color: var(--text-tertiary);
+  color: #a8b4c8;
 }
 
 .statusIndicator {
   width: 8px;
   height: 8px;
   border-radius: 50%;
-  background: var(--success-green);
+  background: #10b981;
   animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
 }
 
@@ -187,7 +241,7 @@
   left: 0;
   right: 0;
   height: 2px;
-  background: var(--primary-blue);
+  background: #06b6d4;
   animation: slideIn 0.3s ease-out;
 }
 
@@ -278,7 +332,7 @@
 
 .submitButton {
   padding: 12px 24px;
-  background: linear-gradient(135deg, var(--primary-blue), var(--primary-light));
+  background: linear-gradient(135deg, #3b82f6, #06b6d4);
   color: white;
   border: none;
   border-radius: 8px;
@@ -286,12 +340,12 @@
   font-size: 14px;
   cursor: pointer;
   transition: all 0.2s ease-out;
-  box-shadow: var(--shadow-md);
+  box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
 }
 
 .submitButton:hover {
   transform: translateY(-2px);
-  box-shadow: var(--shadow-lg);
+  box-shadow: 0 8px 24px rgba(59, 130, 246, 0.4);
 }
 
 .submitButton:active {
@@ -366,12 +420,12 @@
 }
 
 .chipMinor {
-  background: rgba(59, 130, 246, 0.1);
-  color: var(--primary-blue);
+  background: rgba(59, 130, 246, 0.2);
+  color: #60a5fa;
 }
 
 .chipMinor .chipDot {
-  background: var(--primary-blue);
+  background: #60a5fa;
 }
 
 .chipMajor {
@@ -410,7 +464,7 @@
 .alertBox {
   padding: 16px 20px;
   border-radius: 8px;
-  border-left: 4px solid var(--neutral-300);
+  border-left: 4px solid rgba(96, 165, 250, 0.3);
   font-size: 14px;
   animation: slideInUp 0.3s ease-out;
 }
@@ -669,7 +723,7 @@
 }
 
 .text-muted {
-  color: var(--text-tertiary);
+  color: #a8b4c8;
 }
 
 .flex-center {
