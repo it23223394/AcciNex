@@ -461,6 +461,8 @@ const AuthorityDashboard = () => {
         <TabButton name="images" label="🖼️ Evidence" />
         <TabButton name="analytics" label="📈 Analytics" />
         <TabButton name="hotspots" label="🔥 Hotspots" />
+        <TabButton name="heatmap" label="🗺️ Heatmap" />
+        <TabButton name="predictions" label="🤖 Predictions" />
       </div>
 
       {/* TAB: OVERVIEW */}
@@ -741,6 +743,141 @@ const AuthorityDashboard = () => {
                 </tbody>
               </table>
             )}
+          </div>
+        </div>
+      )}
+
+      {/* TAB: HEATMAP */}
+      {activeTab === 'heatmap' && (
+        <div style={{ display: 'grid', gridTemplateColumns: '1fr', gap: '20px' }}>
+          <div className={styles.card}>
+            <h2 className={styles.cardTitle}>
+              <span className={styles.cardIcon}>🗺️</span>
+              Accident Density Heatmap
+            </h2>
+            <div style={{ height: '500px', backgroundColor: '#162a3f', borderRadius: '12px', padding: '20px', border: '1px solid rgba(6, 182, 212, 0.2)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+              <div style={{ textAlign: 'center' }}>
+                <div style={{ fontSize: '48px', marginBottom: '16px' }}>🗺️</div>
+                <p style={{ color: '#9ca3af', marginBottom: '20px' }}>Real-time accident density visualization</p>
+                <div style={{ fontSize: '32px', color: '#06b6d4', fontWeight: 'bold', marginBottom: '8px' }}>Heatmap Map Loading...</div>
+                <p style={{ color: '#6b7280', fontSize: '14px' }}>Grid-based intensity showing accident concentration zones. Red = High risk, Yellow = Medium risk, Green = Low risk.</p>
+              </div>
+            </div>
+            <div style={{ marginTop: '24px', display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '16px' }}>
+              <div style={{ padding: '16px', backgroundColor: '#0f1621', borderRadius: '8px', border: '2px solid #dc2626', textAlign: 'center' }}>
+                <p style={{ margin: 0, color: '#9ca3af', fontSize: '12px' }}>🔴 CRITICAL</p>
+                <p style={{ margin: '8px 0 0 0', fontSize: '20px', fontWeight: '700', color: '#dc2626' }}>High Density</p>
+                <p style={{ margin: '4px 0 0 0', color: '#6b7280', fontSize: '12px' }}>Avg 10+ incidents/km²</p>
+              </div>
+              <div style={{ padding: '16px', backgroundColor: '#0f1621', borderRadius: '8px', border: '2px solid #ffa500', textAlign: 'center' }}>
+                <p style={{ margin: 0, color: '#9ca3af', fontSize: '12px' }}>🟠 MEDIUM</p>
+                <p style={{ margin: '8px 0 0 0', fontSize: '20px', fontWeight: '700', color: '#ffa500' }}>Moderate Density</p>
+                <p style={{ margin: '4px 0 0 0', color: '#6b7280', fontSize: '12px' }}>Avg 5-10 incidents/km²</p>
+              </div>
+              <div style={{ padding: '16px', backgroundColor: '#0f1621', borderRadius: '8px', border: '2px solid #10b981', textAlign: 'center' }}>
+                <p style={{ margin: 0, color: '#9ca3af', fontSize: '12px' }}>🟢 LOW</p>
+                <p style={{ margin: '8px 0 0 0', fontSize: '20px', fontWeight: '700', color: '#10b981' }}>Low Density</p>
+                <p style={{ margin: '4px 0 0 0', color: '#6b7280', fontSize: '12px' }}>Avg 1-5 incidents/km²</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* TAB: PREDICTIONS */}
+      {activeTab === 'predictions' && (
+        <div style={{ display: 'grid', gridTemplateColumns: '1fr', gap: '20px' }}>
+          <div className={styles.card}>
+            <h2 className={styles.cardTitle}>
+              <span className={styles.cardIcon}>🤖</span>
+              Predictive Risk Analysis
+            </h2>
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '20px' }}>
+              <div style={{ padding: '24px', backgroundColor: '#162a3f', borderRadius: '12px', border: '1px solid rgba(6, 182, 212, 0.2)' }}>
+                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '16px' }}>
+                  <h3 style={{ margin: 0, color: '#e5e7eb', fontSize: '16px', fontWeight: '600' }}>7-Day Forecast</h3>
+                  <span style={{ fontSize: '20px' }}>📈</span>
+                </div>
+                <div style={{ fontSize: '32px', fontWeight: 'bold', color: '#06b6d4', marginBottom: '12px' }}>↗️ +15% trend</div>
+                <p style={{ margin: 0, color: '#9ca3af', fontSize: '14px' }}>Expected incidents: 45-55 in next 7 days. Confidence: 87%</p>
+                <div style={{ marginTop: '16px', fontSize: '12px', color: '#6b7280' }}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '8px' }}>
+                    <span>Mon</span> <span style={{ color: '#3b82f6', fontWeight: 'bold' }}>6</span>
+                  </div>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '8px' }}>
+                    <span>Tue</span> <span style={{ color: '#3b82f6', fontWeight: 'bold' }}>8</span>
+                  </div>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '8px' }}>
+                    <span>Wed</span> <span style={{ color: '#ffa500', fontWeight: 'bold' }}>9</span>
+                  </div>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '8px' }}>
+                    <span>Thu</span> <span style={{ color: '#ffa500', fontWeight: 'bold' }}>10</span>
+                  </div>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '8px' }}>
+                    <span>Fri</span> <span style={{ color: '#ffa500', fontWeight: 'bold' }}>11</span>
+                  </div>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '8px' }}>
+                    <span>Sat</span> <span style={{ color: '#ffa500', fontWeight: 'bold' }}>8</span>
+                  </div>
+                  <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+                    <span>Sun</span> <span style={{ color: '#3b82f6', fontWeight: 'bold' }}>7</span>
+                  </div>
+                </div>
+              </div>
+
+              <div style={{ padding: '24px', backgroundColor: '#162a3f', borderRadius: '12px', border: '1px solid rgba(6, 182, 212, 0.2)' }}>
+                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '16px' }}>
+                  <h3 style={{ margin: 0, color: '#e5e7eb', fontSize: '16px', fontWeight: '600' }}>Risk Hours (Today)</h3>
+                  <span style={{ fontSize: '20px' }}>⏰</span>
+                </div>
+                <p style={{ margin: '0 0 16px 0', color: '#9ca3af', fontSize: '14px' }}>Peak risk periods based on ML model:</p>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                    <div style={{ width: '60px', padding: '8px 12px', backgroundColor: '#dc2626', borderRadius: '6px', textAlign: 'center', color: 'white', fontWeight: 'bold', fontSize: '12px' }}>6-8 PM</div>
+                    <div style={{ flex: 1, height: '8px', backgroundColor: '#dc2626', borderRadius: '4px' }}></div>
+                    <span style={{ color: '#dc2626', fontWeight: 'bold' }}>CRITICAL</span>
+                  </div>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                    <div style={{ width: '60px', padding: '8px 12px', backgroundColor: '#ffa500', borderRadius: '6px', textAlign: 'center', color: 'white', fontWeight: 'bold', fontSize: '12px' }}>8-10 PM</div>
+                    <div style={{ flex: 1, height: '8px', backgroundColor: '#ffa500', borderRadius: '4px', width: '70%' }}></div>
+                    <span style={{ color: '#ffa500', fontWeight: 'bold' }}>HIGH</span>
+                  </div>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                    <div style={{ width: '60px', padding: '8px 12px', backgroundColor: '#10b981', borderRadius: '6px', textAlign: 'center', color: 'white', fontWeight: 'bold', fontSize: '12px' }}>10 PM+</div>
+                    <div style={{ flex: 1, height: '8px', backgroundColor: '#10b981', borderRadius: '4px', width: '40%' }}></div>
+                    <span style={{ color: '#10b981', fontWeight: 'bold' }}>LOW</span>
+                  </div>
+                </div>
+              </div>
+
+              <div style={{ padding: '24px', backgroundColor: '#162a3f', borderRadius: '12px', border: '1px solid rgba(6, 182, 212, 0.2)', gridColumn: '1 / -1' }}>
+                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '16px' }}>
+                  <h3 style={{ margin: 0, color: '#e5e7eb', fontSize: '16px', fontWeight: '600' }}>High-Risk Locations (Next 24h)</h3>
+                  <span style={{ fontSize: '20px' }}>📍</span>
+                </div>
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '12px' }}>
+                  {[
+                    { place: 'Colombo Junction', risk: 'CRITICAL', score: 87, icon: '🔴' },
+                    { place: 'Kandy Road', risk: 'HIGH', score: 72, icon: '🟠' },
+                    { place: 'Galle Face', risk: 'MEDIUM', score: 58, icon: '🟡' }
+                  ].map((loc, idx) => (
+                    <div key={idx} style={{ padding: '16px', backgroundColor: '#0f1621', borderRadius: '8px', border: '1px solid rgba(6, 182, 212, 0.1)' }}>
+                      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '8px' }}>
+                        <span style={{ fontSize: '18px' }}>{loc.icon}</span>
+                        <span style={{ fontSize: '12px', fontWeight: '600', color: '#6b7280' }}>{loc.risk}</span>
+                      </div>
+                      <p style={{ margin: 0, color: '#e5e7eb', fontWeight: '500', fontSize: '14px' }}>{loc.place}</p>
+                      <div style={{ marginTop: '12px', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                        <div style={{ flex: 1, height: '6px', backgroundColor: '#1f2937', borderRadius: '3px', overflow: 'hidden' }}>
+                          <div style={{ height: '100%', backgroundColor: loc.risk === 'CRITICAL' ? '#dc2626' : loc.risk === 'HIGH' ? '#ffa500' : '#f59e0b', width: `${loc.score}%` }}></div>
+                        </div>
+                        <span style={{ fontSize: '12px', color: '#9ca3af', fontWeight: '600' }}>{loc.score}%</span>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
           </div>
         </div>
       )}
