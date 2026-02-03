@@ -990,7 +990,7 @@ const AuthorityDashboard = () => {
               <div style={{ padding: '16px', backgroundColor: '#0f1621', borderRadius: '8px', border: '2px solid #10b981', textAlign: 'center' }}>
                 <p style={{ margin: 0, color: '#9ca3af', fontSize: '12px' }}>🟢 LOW</p>
                 <p style={{ margin: '8px 0 0 0', fontSize: '20px', fontWeight: '700', color: '#10b981' }}>Low Density</p>
-                <p style={{ margin: '4px 0 0 0', color: '#6b7280', fontSize: '12px' }}>Intensity < 25%</p>
+                <p style={{ margin: '4px 0 0 0', color: '#6b7280', fontSize: '12px' }}>Intensity &lt; 25%</p>
               </div>
             </div>
             {heatmapData.length > 0 && (
