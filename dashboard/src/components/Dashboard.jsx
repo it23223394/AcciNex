@@ -10,6 +10,9 @@ const LoginPage = ({ onLogin }) => {
   const [password, setPassword] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState('');
+  const [isRegister, setIsRegister] = useState(false);
+  const [username, setUsername] = useState('');
+  const [department, setDepartment] = useState('Traffic');
 
   const handleLogin = async (e) => {
     e.preventDefault();
@@ -24,7 +27,8 @@ const LoginPage = ({ onLogin }) => {
       });
 
       if (!response.ok) {
-        setError('Invalid email or password');
+        const data = await response.json();
+        setError(data.error || 'Invalid email or password');
         return;
       }
 
@@ -39,6 +43,37 @@ const LoginPage = ({ onLogin }) => {
     }
   };
 
+  const handleRegister = async (e) => {
+    e.preventDefault();
+    setIsLoading(true);
+    setError('');
+    
+    try {
+      const response = await fetch('http://localhost:3000/api/auth/register', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ username, email, password, role: 'officer', department })
+      });
+
+      if (!response.ok) {
+        const data = await response.json();
+        setError(data.error || 'Registration failed');
+        return;
+      }
+
+      const data = await response.json();
+      alert('Registration successful! Please login with your credentials.');
+      setIsRegister(false);
+      setEmail('');
+      setPassword('');
+      setUsername('');
+    } catch (err) {
+      setError('Error registering: ' + err.message);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   return (
     <div className={styles.dashboardContainer}>
       <div className={styles.loginContainer}>
@@ -46,39 +81,111 @@ const LoginPage = ({ onLogin }) => {
           <h1 className={styles.loginTitle}>🚔 AcciNex</h1>
           <p className={styles.loginSubtitle}>Road Safety Intelligence Platform</p>
           
-          <form onSubmit={handleLogin} className={styles.loginForm}>
-            <div className={styles.formGroup}>
-              <label className={styles.formLabel}>Email</label>
-              <input
-                className={styles.formInput}
-                type="email"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                placeholder="Enter your email"
-                required
-              />
-            </div>
+          {!isRegister ? (
+            <form onSubmit={handleLogin} className={styles.loginForm}>
+              <div className={styles.formGroup}>
+                <label className={styles.formLabel}>Email</label>
+                <input
+                  className={styles.formInput}
+                  type="email"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  placeholder="Enter your email"
+                  required
+                />
+              </div>
 
-            <div className={styles.formGroup}>
-              <label className={styles.formLabel}>Password</label>
-              <input
-                className={styles.formInput}
-                type="password"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                placeholder="Enter your password"
-                required
-              />
-            </div>
+              <div className={styles.formGroup}>
+                <label className={styles.formLabel}>Password</label>
+                <input
+                  className={styles.formInput}
+                  type="password"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  placeholder="Enter your password"
+                  required
+                />
+              </div>
 
-            {error && <div className={styles.alertDanger} style={{ marginBottom: '16px' }}>{error}</div>}
+              {error && <div className={styles.alertDanger} style={{ marginBottom: '16px', padding: '12px', borderRadius: '6px' }}>{error}</div>}
 
-            <button type="submit" className={styles.submitButton} disabled={isLoading}>
-              {isLoading ? '🔐 Logging in...' : '🔐 Login'}
-            </button>
-          </form>
+              <button type="submit" className={styles.submitButton} disabled={isLoading}>
+                {isLoading ? '🔐 Logging in...' : '🔐 Login'}
+              </button>
+            </form>
+          ) : (
+            <form onSubmit={handleRegister} className={styles.loginForm}>
+              <div className={styles.formGroup}>
+                <label className={styles.formLabel}>Username</label>
+                <input
+                  className={styles.formInput}
+                  type="text"
+                  value={username}
+                  onChange={(e) => setUsername(e.target.value)}
+                  placeholder="Enter username"
+                  required
+                />
+              </div>
 
-          <p className={styles.loginHint}>Demo: Use test@example.com / password123</p>
+              <div className={styles.formGroup}>
+                <label className={styles.formLabel}>Email</label>
+                <input
+                  className={styles.formInput}
+                  type="email"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  placeholder="Enter email"
+                  required
+                />
+              </div>
+
+              <div className={styles.formGroup}>
+                <label className={styles.formLabel}>Password</label>
+                <input
+                  className={styles.formInput}
+                  type="password"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  placeholder="Enter password"
+                  required
+                />
+              </div>
+
+              <div className={styles.formGroup}>
+                <label className={styles.formLabel}>Department</label>
+                <select 
+                  className={styles.formInput}
+                  value={department}
+                  onChange={(e) => setDepartment(e.target.value)}
+                >
+                  <option>Traffic</option>
+                  <option>Police</option>
+                  <option>Emergency</option>
+                  <option>Medical</option>
+                </select>
+              </div>
+
+              {error && <div className={styles.alertDanger} style={{ marginBottom: '16px', padding: '12px', borderRadius: '6px' }}>{error}</div>}
+
+              <button type="submit" className={styles.submitButton} disabled={isLoading}>
+                {isLoading ? '⏳ Creating Account...' : '✅ Create Account'}
+              </button>
+            </form>
+          )}
+
+          <div className={styles.authLinks}>
+            {!isRegister ? (
+              <>
+                <p className={styles.authText}>
+                  Don't have an account? <button type="button" className={styles.linkButton} onClick={() => setIsRegister(true)}>Create one</button>
+                </p>
+              </>
+            ) : (
+              <p className={styles.authText}>
+                Already have an account? <button type="button" className={styles.linkButton} onClick={() => setIsRegister(false)}>Login</button>
+              </p>
+            )}
+          </div>
         </div>
       </div>
     </div>
