@@ -362,6 +362,13 @@ const AuthorityDashboard = () => {
     }
   };
 
+  // Logout Handler
+  const handleLogout = () => {
+    localStorage.removeItem('token');
+    localStorage.removeItem('user');
+    setIsLoggedIn(false);
+  };
+
   // Tab Component
   const TabButton = ({ name, label }) => (
     <button
@@ -408,8 +415,15 @@ const AuthorityDashboard = () => {
         <div className={styles.dashboardContainer}>
       {/* Header Section */}
       <header className={styles.headerSection}>
-        <h1 className={styles.mainTitle}>🚔 AcciNex – Authority Dashboard</h1>
-        <p className={styles.subtitle}>Predictive road safety intelligence | Real-time accident tracking & prevention</p>
+        <div className={styles.headerContent}>
+          <div>
+            <h1 className={styles.mainTitle}>🚔 AcciNex – Authority Dashboard</h1>
+            <p className={styles.subtitle}>Predictive road safety intelligence | Real-time accident tracking & prevention</p>
+          </div>
+          <button onClick={handleLogout} className={styles.logoutButton}>
+            🚪 Logout
+          </button>
+        </div>
       </header>
 
       {/* KPI Grid */}

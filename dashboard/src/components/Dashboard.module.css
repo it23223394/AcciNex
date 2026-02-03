@@ -136,6 +136,18 @@
 .headerSection {
   margin-bottom: 40px;
   animation: fadeInDown 0.5s ease-out;
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 20px;
+}
+
+.headerContent {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  width: 100%;
+  gap: 20px;
 }
 
 .mainTitle {
@@ -156,6 +168,30 @@
   margin: 8px 0 0 0;
   font-weight: 400;
   letter-spacing: 0.2px;
+}
+
+.logoutButton {
+  padding: 10px 20px;
+  background: linear-gradient(135deg, #dc2626 0%, #991b1b 100%);
+  border: 1px solid rgba(220, 38, 38, 0.5);
+  color: white;
+  border-radius: 8px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease-out;
+  font-size: 14px;
+  white-space: nowrap;
+  box-shadow: 0 4px 12px rgba(220, 38, 38, 0.3);
+}
+
+.logoutButton:hover {
+  background: linear-gradient(135deg, #b91c1c 0%, #7f1d1d 100%);
+  box-shadow: 0 8px 20px rgba(220, 38, 38, 0.5);
+  transform: translateY(-2px);
+}
+
+.logoutButton:active {
+  transform: translateY(0);
 }
 
 /* ========================================
