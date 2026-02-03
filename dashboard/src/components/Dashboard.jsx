@@ -12,7 +12,7 @@ const LoginPage = ({ onLogin }) => {
   const [error, setError] = useState('');
   const [isRegister, setIsRegister] = useState(false);
   const [username, setUsername] = useState('');
-  const [department, setDepartment] = useState('Traffic');
+  const [department, setDepartment] = useState('Traffic Police');
 
   const handleLogin = async (e) => {
     e.preventDefault();
@@ -52,7 +52,7 @@ const LoginPage = ({ onLogin }) => {
       const response = await fetch('http://localhost:3000/api/auth/register', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ username, email, password, role: 'officer', department })
+        body: JSON.stringify({ username, email, password, role: 'traffic_police', department })
       });
 
       if (!response.ok) {
@@ -158,10 +158,10 @@ const LoginPage = ({ onLogin }) => {
                   value={department}
                   onChange={(e) => setDepartment(e.target.value)}
                 >
-                  <option>Traffic</option>
-                  <option>Police</option>
-                  <option>Emergency</option>
-                  <option>Medical</option>
+                  <option>Traffic Police</option>
+                  <option>Emergency Services</option>
+                  <option>Road Safety</option>
+                  <option>Public Safety</option>
                 </select>
               </div>
 
