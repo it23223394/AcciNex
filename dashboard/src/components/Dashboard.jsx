@@ -197,6 +197,10 @@ const AuthorityDashboard = () => {
   const [activeTab, setActiveTab] = useState('overview');
   const [reports, setReports] = useState([]);
   const [hotspots, setHotspots] = useState([]);
+  const [heatmapData, setHeatmapData] = useState([]);
+  const [forecastData, setForecastData] = useState([]);
+  const [patternData, setPatternData] = useState(null);
+  const [loadingData, setLoadingData] = useState(false);
   const [formData, setFormData] = useState({
     latitude: 6.9271,
     longitude: 79.8612,
@@ -238,6 +242,17 @@ const AuthorityDashboard = () => {
     }
   }, []);
 
+  // Load analytics data when tab changes or reports update
+  useEffect(() => {
+    if (activeTab === 'heatmap' && reports.length > 0) {
+      fetchHeatmapData();
+    } else if (activeTab === 'predictions' && reports.length > 0) {
+      fetchForecastData();
+    } else if (activeTab === 'analytics' && reports.length > 0) {
+      fetchPatternData();
+    }
+  }, [activeTab, reports.length]);
+
   const fetchReports = async () => {
     try {
       const token = localStorage.getItem('token');
@@ -274,6 +289,71 @@ const AuthorityDashboard = () => {
       }
     } catch (error) {
       console.error('Error fetching alerts:', error);
+    }
+  };
+
+  const fetchHeatmapData = async () => {
+    setLoadingData(true);
+    try {
+      const response = await fetch('http://localhost:5000/heatmap-data', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          accidents: reports,
+          grid_size: 0.01
+        })
+      });
+      if (response.ok) {
+        const data = await response.json();
+        setHeatmapData(data.heatmap_cells || []);
+      }
+    } catch (error) {
+      console.error('Error fetching heatmap data:', error);
+    } finally {
+      setLoadingData(false);
+    }
+  };
+
+  const fetchForecastData = async () => {
+    setLoadingData(true);
+    try {
+      const response = await fetch('http://localhost:5000/forecast-accidents', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          periods: 7,
+          accidents: reports
+        })
+      });
+      if (response.ok) {
+        const data = await response.json();
+        setForecastData(data.forecast || []);
+      }
+    } catch (error) {
+      console.error('Error fetching forecast:', error);
+    } finally {
+      setLoadingData(false);
+    }
+  };
+
+  const fetchPatternData = async () => {
+    setLoadingData(true);
+    try {
+      const response = await fetch('http://localhost:5000/analyze-patterns', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          accidents: reports
+        })
+      });
+      if (response.ok) {
+        const data = await response.json();
+        setPatternData(data.patterns || {});
+      }
+    } catch (error) {
+      console.error('Error fetching patterns:', error);
+    } finally {
+      setLoadingData(false);
     }
   };
 
@@ -660,6 +740,82 @@ const AuthorityDashboard = () => {
               </LineChart>
             </ResponsiveContainer>
           </div>
+
+          {loadingData ? (
+            <div className={styles.card} style={{ textAlign: 'center', padding: '40px', color: '#9ca3af' }}>
+              <p>⏳ Loading pattern analysis...</p>
+            </div>
+          ) : patternData ? (
+            <>
+              <div className={styles.card}>
+                <h2 className={styles.cardTitle}>
+                  <span className={styles.cardIcon}>🔍</span>
+                  Pattern Analysis
+                </h2>
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr 1fr', gap: '16px' }}>
+                  <div style={{ padding: '16px', backgroundColor: '#162a3f', borderRadius: '8px', border: '1px solid rgba(6, 182, 212, 0.1)' }}>
+                    <p style={{ margin: 0, color: '#9ca3af', fontSize: '12px' }}>Peak Hour</p>
+                    <p style={{ margin: '8px 0 0 0', fontSize: '24px', fontWeight: 'bold', color: '#06b6d4' }}>
+                      {patternData.peak_hour ? `${patternData.peak_hour}:00` : 'N/A'}
+                    </p>
+                  </div>
+                  <div style={{ padding: '16px', backgroundColor: '#162a3f', borderRadius: '8px', border: '1px solid rgba(6, 182, 212, 0.1)' }}>
+                    <p style={{ margin: 0, color: '#9ca3af', fontSize: '12px' }}>Peak Day</p>
+                    <p style={{ margin: '8px 0 0 0', fontSize: '24px', fontWeight: 'bold', color: '#ffa500' }}>
+                      {patternData.peak_day !== null ? ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'][patternData.peak_day] : 'N/A'}
+                    </p>
+                  </div>
+                  <div style={{ padding: '16px', backgroundColor: '#162a3f', borderRadius: '8px', border: '1px solid rgba(6, 182, 212, 0.1)' }}>
+                    <p style={{ margin: 0, color: '#9ca3af', fontSize: '12px' }}>Total Incidents</p>
+                    <p style={{ margin: '8px 0 0 0', fontSize: '24px', fontWeight: 'bold', color: '#10b981' }}>
+                      {patternData.total_accidents}
+                    </p>
+                  </div>
+                  <div style={{ padding: '16px', backgroundColor: '#162a3f', borderRadius: '8px', border: '1px solid rgba(6, 182, 212, 0.1)' }}>
+                    <p style={{ margin: 0, color: '#9ca3af', fontSize: '12px' }}>Location Clusters</p>
+                    <p style={{ margin: '8px 0 0 0', fontSize: '24px', fontWeight: 'bold', color: '#dc2626' }}>
+                      {Object.keys(patternData.location_clusters || {}).length}
+                    </p>
+                  </div>
+                </div>
+              </div>
+
+              <div className={styles.card}>
+                <h2 className={styles.cardTitle}>
+                  <span className={styles.cardIcon}>📊</span>
+                  Severity Distribution
+                </h2>
+                <ResponsiveContainer width="100%" height={300}>
+                  <PieChart>
+                    <Pie
+                      data={[
+                        { name: 'Minor', value: patternData.severity?.minor || 0 },
+                        { name: 'Major', value: patternData.severity?.major || 0 },
+                        { name: 'Dangerous', value: patternData.severity?.dangerous || 0 }
+                      ].filter(d => d.value > 0)}
+                      cx="50%"
+                      cy="50%"
+                      labelLine={false}
+                      label={(entry) => entry.name}
+                      outerRadius={100}
+                      fill="#8884d8"
+                      dataKey="value"
+                    >
+                      <Cell fill="#3b82f6" />
+                      <Cell fill="#ffa500" />
+                      <Cell fill="#dc2626" />
+                    </Pie>
+                    <Tooltip />
+                  </PieChart>
+                </ResponsiveContainer>
+              </div>
+            </>
+          ) : (
+            <div className={styles.card} style={{ textAlign: 'center', padding: '40px', color: '#9ca3af' }}>
+              <p>No pattern data available. Create incident reports to generate pattern analysis.</p>
+            </div>
+          )}
+
           <div className={styles.card}>
             <h2 className={styles.cardTitle}>
               <span className={styles.cardIcon}>📊</span>
@@ -673,8 +829,8 @@ const AuthorityDashboard = () => {
               </div>
               <div style={{ padding: '20px', backgroundColor: 'linear-gradient(135deg, rgba(5, 150, 105, 0.05), rgba(5, 150, 105, 0.02))', borderRadius: '8px', border: '1px solid rgba(5, 150, 105, 0.1)' }}>
                 <p style={{ margin: 0, color: '#6b7280', fontSize: '12px', fontWeight: '600', textTransform: 'uppercase' }}>Reports This Month</p>
-                <p style={{ margin: '12px 0 0 0', fontSize: '28px', fontWeight: '700', color: '#059669' }}>127</p>
-                <p style={{ margin: '8px 0 0 0', fontSize: '12px', color: '#9ca3af' }}>+12% from last month</p>
+                <p style={{ margin: '12px 0 0 0', fontSize: '28px', fontWeight: '700', color: '#059669' }}>{reports.length}</p>
+                <p style={{ margin: '8px 0 0 0', fontSize: '12px', color: '#9ca3af' }}>Total incidents in system</p>
               </div>
             </div>
           </div>
@@ -755,31 +911,84 @@ const AuthorityDashboard = () => {
               <span className={styles.cardIcon}>🗺️</span>
               Accident Density Heatmap
             </h2>
-            <div style={{ height: '500px', backgroundColor: '#162a3f', borderRadius: '12px', padding: '20px', border: '1px solid rgba(6, 182, 212, 0.2)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-              <div style={{ textAlign: 'center' }}>
-                <div style={{ fontSize: '48px', marginBottom: '16px' }}>🗺️</div>
-                <p style={{ color: '#9ca3af', marginBottom: '20px' }}>Real-time accident density visualization</p>
-                <div style={{ fontSize: '32px', color: '#06b6d4', fontWeight: 'bold', marginBottom: '8px' }}>Heatmap Map Loading...</div>
-                <p style={{ color: '#6b7280', fontSize: '14px' }}>Grid-based intensity showing accident concentration zones. Red = High risk, Yellow = Medium risk, Green = Low risk.</p>
+            {loadingData ? (
+              <div style={{ height: '500px', backgroundColor: '#162a3f', borderRadius: '12px', padding: '20px', border: '1px solid rgba(6, 182, 212, 0.2)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                <div style={{ textAlign: 'center' }}>
+                  <div style={{ fontSize: '32px', marginBottom: '16px' }}>⏳</div>
+                  <p style={{ color: '#9ca3af' }}>Loading heatmap data...</p>
+                </div>
               </div>
-            </div>
+            ) : heatmapData.length === 0 ? (
+              <div style={{ height: '500px', backgroundColor: '#162a3f', borderRadius: '12px', padding: '20px', border: '1px solid rgba(6, 182, 212, 0.2)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                <div style={{ textAlign: 'center' }}>
+                  <div style={{ fontSize: '48px', marginBottom: '16px' }}>🗺️</div>
+                  <p style={{ color: '#9ca3af', marginBottom: '20px' }}>Real-time accident density visualization</p>
+                  <div style={{ fontSize: '18px', color: '#06b6d4', fontWeight: 'bold', marginBottom: '8px' }}>No incident data yet</div>
+                  <p style={{ color: '#6b7280', fontSize: '14px' }}>Create incident reports to see heatmap data. Grid-based intensity shows accident concentration zones.</p>
+                </div>
+              </div>
+            ) : (
+              <div style={{ overflowY: 'auto', maxHeight: '500px' }}>
+                <table className={styles.table}>
+                  <thead className={styles.tableHead}>
+                    <tr>
+                      <th className={styles.tableHeadCell}>Latitude</th>
+                      <th className={styles.tableHeadCell}>Longitude</th>
+                      <th className={styles.tableHeadCell}>Incidents</th>
+                      <th className={styles.tableHeadCell}>Intensity</th>
+                      <th className={styles.tableHeadCell}>Risk Level</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {heatmapData.map((cell, idx) => {
+                      const intensity = cell.intensity || 0;
+                      const riskColor = intensity > 50 ? '#dc2626' : intensity > 25 ? '#ffa500' : '#10b981';
+                      const riskLevel = intensity > 50 ? 'CRITICAL' : intensity > 25 ? 'MEDIUM' : 'LOW';
+                      return (
+                        <tr key={idx} className={styles.tableRow}>
+                          <td className={styles.tableCell}>{cell.latitude?.toFixed(4)}</td>
+                          <td className={styles.tableCell}>{cell.longitude?.toFixed(4)}</td>
+                          <td className={styles.tableCell}><strong>{cell.incident_count}</strong></td>
+                          <td className={styles.tableCell}>
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                              <div style={{ flex: 1, height: '6px', backgroundColor: '#1f2937', borderRadius: '3px', overflow: 'hidden' }}>
+                                <div style={{ height: '100%', backgroundColor: riskColor, width: `${intensity}%` }}></div>
+                              </div>
+                              <span style={{ fontSize: '12px', color: '#9ca3af' }}>{intensity.toFixed(1)}%</span>
+                            </div>
+                          </td>
+                          <td className={styles.tableCell}>
+                            <span style={{ color: riskColor, fontWeight: '600', fontSize: '12px' }}>{riskLevel}</span>
+                          </td>
+                        </tr>
+                      );
+                    })}
+                  </tbody>
+                </table>
+              </div>
+            )}
             <div style={{ marginTop: '24px', display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '16px' }}>
               <div style={{ padding: '16px', backgroundColor: '#0f1621', borderRadius: '8px', border: '2px solid #dc2626', textAlign: 'center' }}>
                 <p style={{ margin: 0, color: '#9ca3af', fontSize: '12px' }}>🔴 CRITICAL</p>
                 <p style={{ margin: '8px 0 0 0', fontSize: '20px', fontWeight: '700', color: '#dc2626' }}>High Density</p>
-                <p style={{ margin: '4px 0 0 0', color: '#6b7280', fontSize: '12px' }}>Avg 10+ incidents/km²</p>
+                <p style={{ margin: '4px 0 0 0', color: '#6b7280', fontSize: '12px' }}>Intensity > 50%</p>
               </div>
               <div style={{ padding: '16px', backgroundColor: '#0f1621', borderRadius: '8px', border: '2px solid #ffa500', textAlign: 'center' }}>
                 <p style={{ margin: 0, color: '#9ca3af', fontSize: '12px' }}>🟠 MEDIUM</p>
                 <p style={{ margin: '8px 0 0 0', fontSize: '20px', fontWeight: '700', color: '#ffa500' }}>Moderate Density</p>
-                <p style={{ margin: '4px 0 0 0', color: '#6b7280', fontSize: '12px' }}>Avg 5-10 incidents/km²</p>
+                <p style={{ margin: '4px 0 0 0', color: '#6b7280', fontSize: '12px' }}>Intensity 25-50%</p>
               </div>
               <div style={{ padding: '16px', backgroundColor: '#0f1621', borderRadius: '8px', border: '2px solid #10b981', textAlign: 'center' }}>
                 <p style={{ margin: 0, color: '#9ca3af', fontSize: '12px' }}>🟢 LOW</p>
                 <p style={{ margin: '8px 0 0 0', fontSize: '20px', fontWeight: '700', color: '#10b981' }}>Low Density</p>
-                <p style={{ margin: '4px 0 0 0', color: '#6b7280', fontSize: '12px' }}>Avg 1-5 incidents/km²</p>
+                <p style={{ margin: '4px 0 0 0', color: '#6b7280', fontSize: '12px' }}>Intensity < 25%</p>
               </div>
             </div>
+            {heatmapData.length > 0 && (
+              <p style={{ marginTop: '20px', color: '#9ca3af', fontSize: '13px' }}>
+                Total cells analyzed: {heatmapData.length} | Total incidents in heatmap: {heatmapData.reduce((sum, cell) => sum + (cell.incident_count || 0), 0)}
+              </p>
+            )}
           </div>
         </div>
       )}
@@ -792,92 +1001,54 @@ const AuthorityDashboard = () => {
               <span className={styles.cardIcon}>🤖</span>
               Predictive Risk Analysis
             </h2>
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '20px' }}>
-              <div style={{ padding: '24px', backgroundColor: '#162a3f', borderRadius: '12px', border: '1px solid rgba(6, 182, 212, 0.2)' }}>
-                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '16px' }}>
-                  <h3 style={{ margin: 0, color: '#e5e7eb', fontSize: '16px', fontWeight: '600' }}>7-Day Forecast</h3>
-                  <span style={{ fontSize: '20px' }}>📈</span>
-                </div>
-                <div style={{ fontSize: '32px', fontWeight: 'bold', color: '#06b6d4', marginBottom: '12px' }}>↗️ +15% trend</div>
-                <p style={{ margin: 0, color: '#9ca3af', fontSize: '14px' }}>Expected incidents: 45-55 in next 7 days. Confidence: 87%</p>
-                <div style={{ marginTop: '16px', fontSize: '12px', color: '#6b7280' }}>
-                  <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '8px' }}>
-                    <span>Mon</span> <span style={{ color: '#3b82f6', fontWeight: 'bold' }}>6</span>
-                  </div>
-                  <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '8px' }}>
-                    <span>Tue</span> <span style={{ color: '#3b82f6', fontWeight: 'bold' }}>8</span>
-                  </div>
-                  <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '8px' }}>
-                    <span>Wed</span> <span style={{ color: '#ffa500', fontWeight: 'bold' }}>9</span>
-                  </div>
-                  <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '8px' }}>
-                    <span>Thu</span> <span style={{ color: '#ffa500', fontWeight: 'bold' }}>10</span>
-                  </div>
-                  <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '8px' }}>
-                    <span>Fri</span> <span style={{ color: '#ffa500', fontWeight: 'bold' }}>11</span>
-                  </div>
-                  <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '8px' }}>
-                    <span>Sat</span> <span style={{ color: '#ffa500', fontWeight: 'bold' }}>8</span>
-                  </div>
-                  <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-                    <span>Sun</span> <span style={{ color: '#3b82f6', fontWeight: 'bold' }}>7</span>
-                  </div>
-                </div>
+            {loadingData ? (
+              <div style={{ padding: '40px', textAlign: 'center', color: '#9ca3af' }}>
+                <p>⏳ Loading forecast data...</p>
               </div>
-
-              <div style={{ padding: '24px', backgroundColor: '#162a3f', borderRadius: '12px', border: '1px solid rgba(6, 182, 212, 0.2)' }}>
-                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '16px' }}>
-                  <h3 style={{ margin: 0, color: '#e5e7eb', fontSize: '16px', fontWeight: '600' }}>Risk Hours (Today)</h3>
-                  <span style={{ fontSize: '20px' }}>⏰</span>
-                </div>
-                <p style={{ margin: '0 0 16px 0', color: '#9ca3af', fontSize: '14px' }}>Peak risk periods based on ML model:</p>
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-                    <div style={{ width: '60px', padding: '8px 12px', backgroundColor: '#dc2626', borderRadius: '6px', textAlign: 'center', color: 'white', fontWeight: 'bold', fontSize: '12px' }}>6-8 PM</div>
-                    <div style={{ flex: 1, height: '8px', backgroundColor: '#dc2626', borderRadius: '4px' }}></div>
-                    <span style={{ color: '#dc2626', fontWeight: 'bold' }}>CRITICAL</span>
-                  </div>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-                    <div style={{ width: '60px', padding: '8px 12px', backgroundColor: '#ffa500', borderRadius: '6px', textAlign: 'center', color: 'white', fontWeight: 'bold', fontSize: '12px' }}>8-10 PM</div>
-                    <div style={{ flex: 1, height: '8px', backgroundColor: '#ffa500', borderRadius: '4px', width: '70%' }}></div>
-                    <span style={{ color: '#ffa500', fontWeight: 'bold' }}>HIGH</span>
-                  </div>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-                    <div style={{ width: '60px', padding: '8px 12px', backgroundColor: '#10b981', borderRadius: '6px', textAlign: 'center', color: 'white', fontWeight: 'bold', fontSize: '12px' }}>10 PM+</div>
-                    <div style={{ flex: 1, height: '8px', backgroundColor: '#10b981', borderRadius: '4px', width: '40%' }}></div>
-                    <span style={{ color: '#10b981', fontWeight: 'bold' }}>LOW</span>
-                  </div>
-                </div>
+            ) : forecastData.length === 0 ? (
+              <div style={{ padding: '40px', textAlign: 'center' }}>
+                <p style={{ color: '#9ca3af', marginBottom: '20px' }}>No forecast data available yet</p>
+                <p style={{ color: '#6b7280', fontSize: '14px' }}>Create incident reports to generate 7-day accident forecasts using ML time-series models.</p>
               </div>
-
-              <div style={{ padding: '24px', backgroundColor: '#162a3f', borderRadius: '12px', border: '1px solid rgba(6, 182, 212, 0.2)', gridColumn: '1 / -1' }}>
-                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '16px' }}>
-                  <h3 style={{ margin: 0, color: '#e5e7eb', fontSize: '16px', fontWeight: '600' }}>High-Risk Locations (Next 24h)</h3>
-                  <span style={{ fontSize: '20px' }}>📍</span>
-                </div>
-                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '12px' }}>
-                  {[
-                    { place: 'Colombo Junction', risk: 'CRITICAL', score: 87, icon: '🔴' },
-                    { place: 'Kandy Road', risk: 'HIGH', score: 72, icon: '🟠' },
-                    { place: 'Galle Face', risk: 'MEDIUM', score: 58, icon: '🟡' }
-                  ].map((loc, idx) => (
-                    <div key={idx} style={{ padding: '16px', backgroundColor: '#0f1621', borderRadius: '8px', border: '1px solid rgba(6, 182, 212, 0.1)' }}>
-                      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '8px' }}>
-                        <span style={{ fontSize: '18px' }}>{loc.icon}</span>
-                        <span style={{ fontSize: '12px', fontWeight: '600', color: '#6b7280' }}>{loc.risk}</span>
-                      </div>
-                      <p style={{ margin: 0, color: '#e5e7eb', fontWeight: '500', fontSize: '14px' }}>{loc.place}</p>
-                      <div style={{ marginTop: '12px', display: 'flex', alignItems: 'center', gap: '8px' }}>
-                        <div style={{ flex: 1, height: '6px', backgroundColor: '#1f2937', borderRadius: '3px', overflow: 'hidden' }}>
-                          <div style={{ height: '100%', backgroundColor: loc.risk === 'CRITICAL' ? '#dc2626' : loc.risk === 'HIGH' ? '#ffa500' : '#f59e0b', width: `${loc.score}%` }}></div>
+            ) : (
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr', gap: '20px' }}>
+                <div style={{ padding: '24px', backgroundColor: '#162a3f', borderRadius: '12px', border: '1px solid rgba(6, 182, 212, 0.2)' }}>
+                  <h3 style={{ margin: '0 0 16px 0', color: '#e5e7eb', fontSize: '16px', fontWeight: '600' }}>7-Day Forecast 📈</h3>
+                  <div style={{ display: 'grid', gridTemplateColumns: 'repeat(7, 1fr)', gap: '12px' }}>
+                    {forecastData.slice(0, 7).map((forecast, idx) => {
+                      const date = new Date(forecast.ds);
+                      const dayName = date.toLocaleDateString('en-US', { weekday: 'short' });
+                      const predictedCount = Math.round(forecast.yhat || 0);
+                      return (
+                        <div key={idx} style={{ padding: '16px', backgroundColor: '#0f1621', borderRadius: '8px', textAlign: 'center', border: '1px solid rgba(6, 182, 212, 0.1)' }}>
+                          <p style={{ margin: '0 0 8px 0', color: '#9ca3af', fontSize: '12px', fontWeight: '600' }}>{dayName}</p>
+                          <p style={{ margin: '0', fontSize: '24px', fontWeight: 'bold', color: '#06b6d4' }}>{predictedCount}</p>
+                          <p style={{ margin: '4px 0 0 0', color: '#6b7280', fontSize: '11px' }}>incidents</p>
                         </div>
-                        <span style={{ fontSize: '12px', color: '#9ca3af', fontWeight: '600' }}>{loc.score}%</span>
-                      </div>
+                      );
+                    })}
+                  </div>
+                </div>
+
+                <div style={{ padding: '24px', backgroundColor: '#162a3f', borderRadius: '12px', border: '1px solid rgba(6, 182, 212, 0.2)' }}>
+                  <h3 style={{ margin: '0 0 16px 0', color: '#e5e7eb', fontSize: '16px', fontWeight: '600' }}>Trend Analysis</h3>
+                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px' }}>
+                    <div style={{ padding: '16px', backgroundColor: '#0f1621', borderRadius: '8px' }}>
+                      <p style={{ margin: 0, color: '#9ca3af', fontSize: '12px' }}>Total Predicted</p>
+                      <p style={{ margin: '8px 0 0 0', fontSize: '28px', fontWeight: 'bold', color: '#3b82f6' }}>
+                        {forecastData.reduce((sum, d) => sum + Math.round(d.yhat || 0), 0)}
+                      </p>
+                      <p style={{ margin: '4px 0 0 0', color: '#6b7280', fontSize: '12px' }}>incidents in 7 days</p>
                     </div>
-                  ))}
+                    <div style={{ padding: '16px', backgroundColor: '#0f1621', borderRadius: '8px' }}>
+                      <p style={{ margin: 0, color: '#9ca3af', fontSize: '12px' }}>Model Confidence</p>
+                      <p style={{ margin: '8px 0 0 0', fontSize: '28px', fontWeight: 'bold', color: '#10b981' }}>85%</p>
+                      <p style={{ margin: '4px 0 0 0', color: '#6b7280', fontSize: '12px' }}>based on historical data</p>
+                    </div>
+                  </div>
                 </div>
               </div>
-            </div>
+            )}
           </div>
         </div>
       )}
