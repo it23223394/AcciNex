@@ -275,10 +275,20 @@ const AuthorityDashboard = () => {
   const fetchHotspots = async () => {
     try {
       if (reports.length === 0) return;
+      
+      // Transform reports to match AI service expectations
+      const transformedReports = reports.map(report => ({
+        id: report.report_id || report.id,
+        latitude: parseFloat(report.latitude),
+        longitude: parseFloat(report.longitude),
+        severity: report.severity,
+        accident_time: report.accident_time
+      }));
+
       const response = await fetch('http://localhost:5000/detect-hotspots', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(reports)
+        body: JSON.stringify(transformedReports)
       });
       if (response.ok) {
         const data = await response.json();
@@ -304,11 +314,20 @@ const AuthorityDashboard = () => {
   const fetchHeatmapData = async () => {
     setLoadingData(true);
     try {
+      // Transform reports to match AI service expectations
+      const transformedReports = reports.map(report => ({
+        id: report.report_id || report.id,
+        latitude: parseFloat(report.latitude),
+        longitude: parseFloat(report.longitude),
+        severity: report.severity,
+        accident_time: report.accident_time
+      }));
+
       const response = await fetch('http://localhost:5000/heatmap-data', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          accidents: reports,
+          accidents: transformedReports,
           grid_size: 0.01
         })
       });
@@ -326,12 +345,21 @@ const AuthorityDashboard = () => {
   const fetchForecastData = async () => {
     setLoadingData(true);
     try {
+      // Transform reports to match AI service expectations
+      const transformedReports = reports.map(report => ({
+        id: report.report_id || report.id,
+        latitude: parseFloat(report.latitude),
+        longitude: parseFloat(report.longitude),
+        severity: report.severity,
+        accident_time: report.accident_time
+      }));
+
       const response = await fetch('http://localhost:5000/forecast-accidents', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           periods: 7,
-          accidents: reports
+          accidents: transformedReports
         })
       });
       if (response.ok) {
@@ -348,11 +376,20 @@ const AuthorityDashboard = () => {
   const fetchPatternData = async () => {
     setLoadingData(true);
     try {
+      // Transform reports to match AI service expectations
+      const transformedReports = reports.map(report => ({
+        id: report.report_id || report.id,
+        latitude: parseFloat(report.latitude),
+        longitude: parseFloat(report.longitude),
+        severity: report.severity,
+        accident_time: report.accident_time
+      }));
+
       const response = await fetch('http://localhost:5000/analyze-patterns', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          accidents: reports
+          accidents: transformedReports
         })
       });
       if (response.ok) {
