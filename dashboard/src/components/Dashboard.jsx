@@ -244,12 +244,16 @@ const AuthorityDashboard = () => {
 
   // Load analytics data when tab changes or reports update
   useEffect(() => {
-    if (activeTab === 'heatmap' && reports.length > 0) {
-      fetchHeatmapData();
-    } else if (activeTab === 'predictions' && reports.length > 0) {
-      fetchForecastData();
-    } else if (activeTab === 'analytics' && reports.length > 0) {
-      fetchPatternData();
+    if (reports.length > 0) {
+      if (activeTab === 'heatmap') {
+        fetchHeatmapData();
+      } else if (activeTab === 'predictions') {
+        fetchForecastData();
+      } else if (activeTab === 'analytics') {
+        fetchPatternData();
+      } else if (activeTab === 'hotspots') {
+        fetchHotspots();
+      }
     }
   }, [activeTab, reports.length]);
 
@@ -270,7 +274,12 @@ const AuthorityDashboard = () => {
 
   const fetchHotspots = async () => {
     try {
-      const response = await fetch('http://localhost:3000/api/ai/hotspots');
+      if (reports.length === 0) return;
+      const response = await fetch('http://localhost:5000/detect-hotspots', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(reports)
+      });
       if (response.ok) {
         const data = await response.json();
         setHotspots(Array.isArray(data) ? data : []);
