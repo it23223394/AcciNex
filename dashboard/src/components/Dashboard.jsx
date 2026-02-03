@@ -3,6 +3,7 @@ import {
   BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend,
   PieChart, Pie, Cell, ResponsiveContainer, LineChart, Line
 } from 'recharts';
+import styles from './Dashboard.module.css';
 
 const AuthorityDashboard = () => {
   const [activeTab, setActiveTab] = useState('overview');
@@ -172,85 +173,117 @@ const AuthorityDashboard = () => {
   // Tab Component
   const TabButton = ({ name, label }) => (
     <button
+      className={`${styles.tabButton} ${activeTab === name ? styles.active : ''}`}
       onClick={() => setActiveTab(name)}
-      style={{
-        padding: '12px 20px',
-        backgroundColor: activeTab === name ? '#3182ce' : '#e2e8f0',
-        color: activeTab === name ? '#fff' : '#000',
-        border: 'none',
-        borderRadius: '8px 8px 0 0',
-        cursor: 'pointer',
-        fontWeight: 'bold',
-        marginRight: '5px',
-        transition: 'all 0.3s'
-      }}
     >
       {label}
     </button>
   );
 
+  // Status Badge Component
+  const StatusBadge = ({ severity }) => {
+    const chipClass = {
+      minor: styles.chipMinor,
+      major: styles.chipMajor,
+      dangerous: styles.chipDangerous
+    }[severity] || styles.chipMinor;
+    
+    return (
+      <span className={`${styles.statusChip} ${chipClass}`}>
+        <span className={styles.chipDot}></span>
+        {severity.toUpperCase()}
+      </span>
+    );
+  };
+
+  // KPI Card Component
+  const KPICard = ({ label, value, meta, icon }) => (
+    <div className={styles.kpiCard}>
+      <h3 className={styles.kpiLabel}>{icon} {label}</h3>
+      <p className={styles.kpiValue}>{value}</p>
+      {meta && <div className={styles.kpiMeta}>
+        <div className={styles.statusIndicator}></div>
+        {meta}
+      </div>}
+    </div>
+  );
+
   return (
-    <div style={{ padding: '20px', backgroundColor: '#f5f7fa', minHeight: '100vh', fontFamily: 'sans-serif' }}>
-      {/* Header */}
-      <header style={{ marginBottom: '30px' }}>
-        <h1 style={{ color: '#1a1a1a', margin: 0 }}>🚔 AcciNex Authority Dashboard</h1>
-        <p style={{ color: '#666', margin: '10px 0 0 0' }}>Real-time accident tracking & predictive intelligence</p>
+    <div className={styles.dashboardContainer}>
+      {/* Header Section */}
+      <header className={styles.headerSection}>
+        <h1 className={styles.mainTitle}>🚔 AcciNex – Authority Dashboard</h1>
+        <p className={styles.subtitle}>Predictive road safety intelligence | Real-time accident tracking & prevention</p>
       </header>
 
-      {/* KPI Cards */}
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '20px', marginBottom: '30px' }}>
-        <div style={{ backgroundColor: '#fff', padding: '20px', borderRadius: '10px', boxShadow: '0 2px 10px rgba(0,0,0,0.05)' }}>
-          <h3 style={{ margin: 0, color: '#666', fontSize: '14px' }}>Today's Accidents</h3>
-          <p style={{ margin: '10px 0 0 0', fontSize: '28px', fontWeight: 'bold', color: '#e53e3e' }}>{reports.length}</p>
-        </div>
-        <div style={{ backgroundColor: '#fff', padding: '20px', borderRadius: '10px', boxShadow: '0 2px 10px rgba(0,0,0,0.05)' }}>
-          <h3 style={{ margin: 0, color: '#666', fontSize: '14px' }}>Active Hotspots</h3>
-          <p style={{ margin: '10px 0 0 0', fontSize: '28px', fontWeight: 'bold', color: '#d69e2e' }}>{hotspots.length}</p>
-        </div>
-        <div style={{ backgroundColor: '#fff', padding: '20px', borderRadius: '10px', boxShadow: '0 2px 10px rgba(0,0,0,0.05)' }}>
-          <h3 style={{ margin: 0, color: '#666', fontSize: '14px' }}>Response Time</h3>
-          <p style={{ margin: '10px 0 0 0', fontSize: '28px', fontWeight: 'bold', color: '#38a169' }}>15 min</p>
-        </div>
-        <div style={{ backgroundColor: '#fff', padding: '20px', borderRadius: '10px', boxShadow: '0 2px 10px rgba(0,0,0,0.05)' }}>
-          <h3 style={{ margin: 0, color: '#666', fontSize: '14px' }}>Alerts</h3>
-          <p style={{ margin: '10px 0 0 0', fontSize: '28px', fontWeight: 'bold', color: '#805ad5' }}>{alerts.length}</p>
-        </div>
+      {/* KPI Grid */}
+      <div className={styles.kpiGrid}>
+        <KPICard 
+          icon="📍" 
+          label="Incidents Today" 
+          value={reports.length} 
+          meta="Real-time tracking"
+        />
+        <KPICard 
+          icon="🔥" 
+          label="Risk Hotspots" 
+          value={hotspots.length} 
+          meta="Monitored zones"
+        />
+        <KPICard 
+          icon="⏱️" 
+          label="Avg Response" 
+          value="15 min" 
+          meta="Target: <20 min"
+        />
+        <KPICard 
+          icon="⚠️" 
+          label="Active Alerts" 
+          value={alerts.length} 
+          meta="Requires attention"
+        />
       </div>
 
-      {/* Tabs */}
-      <div style={{ marginBottom: '20px', display: 'flex', gap: '5px' }}>
+      {/* Navigation Tabs */}
+      <div className={styles.tabContainer}>
         <TabButton name="overview" label="📊 Overview" />
         <TabButton name="reports" label="📋 Create Report" />
-        <TabButton name="images" label="🖼️ Image Evidence" />
+        <TabButton name="images" label="🖼️ Evidence" />
         <TabButton name="analytics" label="📈 Analytics" />
-        <TabButton name="hotspots" label="🔥 Hotspots & Alerts" />
+        <TabButton name="hotspots" label="🔥 Hotspots" />
       </div>
 
       {/* TAB: OVERVIEW */}
       {activeTab === 'overview' && (
-        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '20px' }}>
-          <div style={{ backgroundColor: '#fff', padding: '20px', borderRadius: '15px', boxShadow: '0 4px 20px rgba(0,0,0,0.08)' }}>
-            <h2 style={{ marginTop: 0 }}>Severity Distribution</h2>
+        <div className={styles.gridTwoCol}>
+          <div className={styles.card}>
+            <h2 className={styles.cardTitle}>
+              <span className={styles.cardIcon}>📊</span>
+              Severity Distribution
+            </h2>
             <ResponsiveContainer width="100%" height={300}>
               <PieChart>
                 <Pie data={stats.severity_distribution} cx="50%" cy="50%" innerRadius={60} outerRadius={100} paddingAngle={5} dataKey="value" label>
-                  <Cell fill="#e53e3e" />
-                  <Cell fill="#d69e2e" />
-                  <Cell fill="#f6ad55" />
+                  <Cell fill="#1e3a8a" />
+                  <Cell fill="#ea580c" />
+                  <Cell fill="#dc2626" />
                 </Pie>
-                <Tooltip />
+                <Tooltip contentStyle={{ borderRadius: '8px', border: 'none', boxShadow: '0 4px 12px rgba(0,0,0,0.15)' }} />
               </PieChart>
             </ResponsiveContainer>
           </div>
-          <div style={{ backgroundColor: '#fff', padding: '20px', borderRadius: '15px', boxShadow: '0 4px 20px rgba(0,0,0,0.08)' }}>
-            <h2 style={{ marginTop: 0 }}>Hourly Distribution</h2>
+          <div className={styles.card}>
+            <h2 className={styles.cardTitle}>
+              <span className={styles.cardIcon}>⏰</span>
+              Hourly Distribution
+            </h2>
             <ResponsiveContainer width="100%" height={300}>
               <BarChart data={stats.hourly_distribution}>
-                <CartesianGrid strokeDasharray="3 3" />
+                <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
                 <XAxis dataKey="hour" />
                 <YAxis />
-                <Tooltip />
-                <Bar dataKey="accidents" fill="#3182ce" />
+                <Tooltip contentStyle={{ borderRadius: '8px', border: 'none', boxShadow: '0 4px 12px rgba(0,0,0,0.15)' }} />
+                <Bar dataKey="accidents" fill="#3b82f6" radius={[8, 8, 0, 0]} />
               </BarChart>
             </ResponsiveContainer>
           </div>
@@ -259,75 +292,137 @@ const AuthorityDashboard = () => {
 
       {/* TAB: CREATE REPORT */}
       {activeTab === 'reports' && (
-        <div style={{ backgroundColor: '#fff', padding: '20px', borderRadius: '15px', boxShadow: '0 4px 20px rgba(0,0,0,0.08)' }}>
-          <h2>Create Accident Report</h2>
-          <form onSubmit={handleCreateReport} style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '15px' }}>
-            <div>
-              <label style={{ display: 'block', marginBottom: '5px', fontWeight: 'bold' }}>Latitude:</label>
-              <input type="number" step="0.0001" value={formData.latitude} onChange={(e) => setFormData({...formData, latitude: parseFloat(e.target.value)})} style={{ width: '100%', padding: '10px', border: '1px solid #ddd', borderRadius: '5px' }} />
+        <div className={styles.card}>
+          <h2 className={styles.cardTitle}>
+            <span className={styles.cardIcon}>📋</span>
+            Report New Incident
+          </h2>
+          <form onSubmit={handleCreateReport} className={styles.formGrid}>
+            <div className={styles.formGroup}>
+              <label className={styles.formLabel}>Latitude</label>
+              <input 
+                className={styles.formInput}
+                type="number" 
+                step="0.0001" 
+                value={formData.latitude} 
+                onChange={(e) => setFormData({...formData, latitude: parseFloat(e.target.value)})} 
+              />
             </div>
-            <div>
-              <label style={{ display: 'block', marginBottom: '5px', fontWeight: 'bold' }}>Longitude:</label>
-              <input type="number" step="0.0001" value={formData.longitude} onChange={(e) => setFormData({...formData, longitude: parseFloat(e.target.value)})} style={{ width: '100%', padding: '10px', border: '1px solid #ddd', borderRadius: '5px' }} />
+            <div className={styles.formGroup}>
+              <label className={styles.formLabel}>Longitude</label>
+              <input 
+                className={styles.formInput}
+                type="number" 
+                step="0.0001" 
+                value={formData.longitude} 
+                onChange={(e) => setFormData({...formData, longitude: parseFloat(e.target.value)})} 
+              />
             </div>
-            <div>
-              <label style={{ display: 'block', marginBottom: '5px', fontWeight: 'bold' }}>Severity:</label>
-              <select value={formData.severity} onChange={(e) => setFormData({...formData, severity: e.target.value})} style={{ width: '100%', padding: '10px', border: '1px solid #ddd', borderRadius: '5px' }}>
+            <div className={styles.formGroup}>
+              <label className={styles.formLabel}>Severity Level</label>
+              <select 
+                className={styles.formSelect}
+                value={formData.severity} 
+                onChange={(e) => setFormData({...formData, severity: e.target.value})}
+              >
                 <option>minor</option>
                 <option>major</option>
                 <option>dangerous</option>
               </select>
             </div>
-            <div>
-              <label style={{ display: 'block', marginBottom: '5px', fontWeight: 'bold' }}>Weather:</label>
-              <select value={formData.weather_condition} onChange={(e) => setFormData({...formData, weather_condition: e.target.value})} style={{ width: '100%', padding: '10px', border: '1px solid #ddd', borderRadius: '5px' }}>
+            <div className={styles.formGroup}>
+              <label className={styles.formLabel}>Weather Condition</label>
+              <select 
+                className={styles.formSelect}
+                value={formData.weather_condition} 
+                onChange={(e) => setFormData({...formData, weather_condition: e.target.value})}
+              >
                 <option>clear</option>
                 <option>rainy</option>
                 <option>foggy</option>
                 <option>snowy</option>
               </select>
             </div>
-            <div>
-              <label style={{ display: 'block', marginBottom: '5px', fontWeight: 'bold' }}>Vehicle Count:</label>
-              <input type="number" value={formData.vehicle_count} onChange={(e) => setFormData({...formData, vehicle_count: parseInt(e.target.value)})} style={{ width: '100%', padding: '10px', border: '1px solid #ddd', borderRadius: '5px' }} />
+            <div className={styles.formGroup}>
+              <label className={styles.formLabel}>Vehicle Count</label>
+              <input 
+                className={styles.formInput}
+                type="number" 
+                value={formData.vehicle_count} 
+                onChange={(e) => setFormData({...formData, vehicle_count: parseInt(e.target.value)})} 
+              />
             </div>
-            <div>
-              <label style={{ display: 'block', marginBottom: '5px', fontWeight: 'bold' }}>Time:</label>
-              <input type="datetime-local" value={formData.accident_time.slice(0, 16)} onChange={(e) => setFormData({...formData, accident_time: new Date(e.target.value).toISOString()})} style={{ width: '100%', padding: '10px', border: '1px solid #ddd', borderRadius: '5px' }} />
+            <div className={styles.formGroup}>
+              <label className={styles.formLabel}>Incident Time</label>
+              <input 
+                className={styles.formInput}
+                type="datetime-local" 
+                value={formData.accident_time.slice(0, 16)} 
+                onChange={(e) => setFormData({...formData, accident_time: new Date(e.target.value).toISOString()})} 
+              />
             </div>
-            <div style={{ gridColumn: '1 / -1' }}>
-              <label style={{ display: 'block', marginBottom: '5px', fontWeight: 'bold' }}>Description:</label>
-              <textarea value={formData.description} onChange={(e) => setFormData({...formData, description: e.target.value})} style={{ width: '100%', padding: '10px', border: '1px solid #ddd', borderRadius: '5px', minHeight: '100px' }} />
+            <div className={styles.formGroup + ' ' + styles.gridFullWidth}>
+              <label className={styles.formLabel}>Incident Description</label>
+              <textarea 
+                className={styles.formTextarea}
+                value={formData.description} 
+                onChange={(e) => setFormData({...formData, description: e.target.value})} 
+              />
             </div>
-            <button type="submit" style={{ gridColumn: '1 / -1', padding: '12px', backgroundColor: '#38a169', color: '#fff', border: 'none', borderRadius: '8px', cursor: 'pointer', fontWeight: 'bold', fontSize: '16px' }}>📤 Create Report</button>
+            <button 
+              type="submit" 
+              className={styles.submitButton + ' ' + styles.gridFullWidth}
+            >
+              📤 Submit Report
+            </button>
           </form>
-          <button onClick={handleCheckAlerts} style={{ marginTop: '15px', padding: '12px 20px', backgroundColor: '#3182ce', color: '#fff', border: 'none', borderRadius: '8px', cursor: 'pointer', fontWeight: 'bold' }}>🚨 Check Alerts for Location</button>
+          <button 
+            onClick={handleCheckAlerts} 
+            className={styles.submitButton + ' ' + styles.gridFullWidth}
+            style={{ marginTop: '12px', background: 'linear-gradient(135deg, #ea580c, #dc2626)' }}
+          >
+            🚨 Check Location Alerts
+          </button>
         </div>
       )}
 
       {/* TAB: IMAGE UPLOAD */}
       {activeTab === 'images' && (
-        <div style={{ backgroundColor: '#fff', padding: '20px', borderRadius: '15px', boxShadow: '0 4px 20px rgba(0,0,0,0.08)' }}>
-          <h2>Upload Evidence Image with GPS</h2>
+        <div className={styles.card}>
+          <h2 className={styles.cardTitle}>
+            <span className={styles.cardIcon}>🖼️</span>
+            Upload Evidence with GPS Verification
+          </h2>
           <form onSubmit={handleImageUpload}>
-            <div style={{ border: '2px dashed #3182ce', padding: '40px', borderRadius: '10px', textAlign: 'center', marginBottom: '20px', backgroundColor: '#f0f7ff' }}>
-              <input type="file" accept="image/*" onChange={(e) => setImageFile(e.target.files[0])} style={{ display: 'none' }} id="imageInput" />
-              <label htmlFor="imageInput" style={{ cursor: 'pointer', fontSize: '16px', color: '#3182ce', fontWeight: 'bold' }}>
-                📁 Drag & drop image here or click to select
+            <div className={styles.dropZone}>
+              <input 
+                type="file" 
+                accept="image/*" 
+                onChange={(e) => setImageFile(e.target.files[0])} 
+                style={{ display: 'none' }} 
+                id="imageInput" 
+              />
+              <label htmlFor="imageInput" className={styles.dropZoneText}>
+                📁 Drop image here or click to browse
               </label>
-              {imageFile && <p style={{ marginTop: '10px', color: '#38a169' }}>✅ Selected: {imageFile.name}</p>}
+              {imageFile && <p className={styles.dropZoneFile}>✅ {imageFile.name}</p>}
             </div>
-            <button type="submit" disabled={uploadingImage} style={{ width: '100%', padding: '12px', backgroundColor: uploadingImage ? '#ccc' : '#3182ce', color: '#fff', border: 'none', borderRadius: '8px', cursor: uploadingImage ? 'not-allowed' : 'pointer', fontWeight: 'bold', fontSize: '16px' }}>
-              {uploadingImage ? '⏳ Uploading...' : '🖼️ Upload Image with GPS Extraction'}
+            <button 
+              type="submit" 
+              disabled={uploadingImage} 
+              className={styles.submitButton}
+              style={{ width: '100%' }}
+            >
+              {uploadingImage ? '⏳ Processing...' : '🖼️ Upload & Extract GPS'}
             </button>
           </form>
-          <div style={{ marginTop: '20px', padding: '15px', backgroundColor: '#f0f7ff', borderRadius: '8px', fontSize: '14px', color: '#1a1a1a' }}>
-            <strong>ℹ️ How it works:</strong>
-            <ul style={{ margin: '10px 0 0 20px' }}>
-              <li>Upload an image taken with a GPS-enabled camera</li>
-              <li>Our system automatically extracts GPS coordinates from EXIF data</li>
-              <li>Coordinates are verified and stored with your accident report</li>
-              <li>Supports JPEG and PNG formats (max 10MB)</li>
+          <div className={styles.alertBox + ' ' + styles.alertInfo + ' ' + styles.mt_6}>
+            <strong>🔍 Automated GPS Verification</strong>
+            <ul style={{ margin: '12px 0 0 0', paddingLeft: '20px' }}>
+              <li>Extracts GPS from EXIF metadata automatically</li>
+              <li>Validates coordinate accuracy & bounds</li>
+              <li>Links evidence to incident reports</li>
+              <li>Supports JPEG & PNG (max 10MB)</li>
             </ul>
           </div>
         </div>
@@ -336,30 +431,38 @@ const AuthorityDashboard = () => {
       {/* TAB: ANALYTICS */}
       {activeTab === 'analytics' && (
         <div style={{ display: 'grid', gridTemplateColumns: '1fr', gap: '20px' }}>
-          <div style={{ backgroundColor: '#fff', padding: '20px', borderRadius: '15px', boxShadow: '0 4px 20px rgba(0,0,0,0.08)' }}>
-            <h2>Trend Analysis (30 days)</h2>
+          <div className={styles.card}>
+            <h2 className={styles.cardTitle}>
+              <span className={styles.cardIcon}>📈</span>
+              Trend Analysis (30 Days)
+            </h2>
             <ResponsiveContainer width="100%" height={300}>
               <LineChart data={stats.trends}>
-                <CartesianGrid strokeDasharray="3 3" />
+                <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
                 <XAxis dataKey="date" />
                 <YAxis yAxisId="left" />
                 <YAxis yAxisId="right" orientation="right" />
-                <Tooltip />
-                <Line yAxisId="left" type="monotone" dataKey="count" stroke="#3182ce" name="Accidents" />
-                <Line yAxisId="right" type="monotone" dataKey="danger_rate" stroke="#e53e3e" name="Danger Rate" />
+                <Tooltip contentStyle={{ borderRadius: '8px', border: 'none', boxShadow: '0 4px 12px rgba(0,0,0,0.15)' }} />
+                <Line yAxisId="left" type="monotone" dataKey="count" stroke="#3b82f6" name="Incidents" strokeWidth={2} />
+                <Line yAxisId="right" type="monotone" dataKey="danger_rate" stroke="#dc2626" name="Risk Level" strokeWidth={2} />
               </LineChart>
             </ResponsiveContainer>
           </div>
-          <div style={{ backgroundColor: '#fff', padding: '20px', borderRadius: '15px', boxShadow: '0 4px 20px rgba(0,0,0,0.08)' }}>
-            <h2>Key Metrics</h2>
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '15px' }}>
-              <div style={{ padding: '15px', backgroundColor: '#f0f7ff', borderRadius: '8px' }}>
-                <p style={{ margin: 0, color: '#666' }}>Average Response Time</p>
-                <p style={{ margin: '10px 0 0 0', fontSize: '24px', fontWeight: 'bold', color: '#3182ce' }}>15 minutes</p>
+          <div className={styles.card}>
+            <h2 className={styles.cardTitle}>
+              <span className={styles.cardIcon}>📊</span>
+              Performance Metrics
+            </h2>
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px' }}>
+              <div style={{ padding: '20px', backgroundColor: 'linear-gradient(135deg, rgba(59, 130, 246, 0.05), rgba(59, 130, 246, 0.02))', borderRadius: '8px', border: '1px solid rgba(59, 130, 246, 0.1)' }}>
+                <p style={{ margin: 0, color: '#6b7280', fontSize: '12px', fontWeight: '600', textTransform: 'uppercase' }}>Avg Response Time</p>
+                <p style={{ margin: '12px 0 0 0', fontSize: '28px', fontWeight: '700', color: '#3b82f6' }}>15 min</p>
+                <p style={{ margin: '8px 0 0 0', fontSize: '12px', color: '#9ca3af' }}>Target: ≤20 min ✓</p>
               </div>
-              <div style={{ padding: '15px', backgroundColor: '#f0fff4', borderRadius: '8px' }}>
-                <p style={{ margin: 0, color: '#666' }}>Reports This Month</p>
-                <p style={{ margin: '10px 0 0 0', fontSize: '24px', fontWeight: 'bold', color: '#38a169' }}>127</p>
+              <div style={{ padding: '20px', backgroundColor: 'linear-gradient(135deg, rgba(5, 150, 105, 0.05), rgba(5, 150, 105, 0.02))', borderRadius: '8px', border: '1px solid rgba(5, 150, 105, 0.1)' }}>
+                <p style={{ margin: 0, color: '#6b7280', fontSize: '12px', fontWeight: '600', textTransform: 'uppercase' }}>Reports This Month</p>
+                <p style={{ margin: '12px 0 0 0', fontSize: '28px', fontWeight: '700', color: '#059669' }}>127</p>
+                <p style={{ margin: '8px 0 0 0', fontSize: '12px', color: '#9ca3af' }}>+12% from last month</p>
               </div>
             </div>
           </div>
@@ -369,48 +472,60 @@ const AuthorityDashboard = () => {
       {/* TAB: HOTSPOTS & ALERTS */}
       {activeTab === 'hotspots' && (
         <div style={{ display: 'grid', gridTemplateColumns: '1fr', gap: '20px' }}>
-          <div style={{ backgroundColor: '#fff', padding: '20px', borderRadius: '15px', boxShadow: '0 4px 20px rgba(0,0,0,0.08)' }}>
-            <h2>🔥 High-Risk Hotspots</h2>
+          <div className={styles.card}>
+            <h2 className={styles.cardTitle}>
+              <span className={styles.cardIcon}>🔥</span>
+              High-Risk Hotspots
+            </h2>
             {hotspots.length === 0 ? (
-              <p style={{ color: '#999' }}>No hotspots detected yet</p>
+              <div className={styles.emptyState}>
+                <div className={styles.emptyStateIcon}>🗺️</div>
+                <p className={styles.emptyStateText}>No hotspots detected. System monitoring in progress.</p>
+              </div>
             ) : (
-              <table style={{ width: '100%', borderCollapse: 'collapse' }}>
-                <thead>
-                  <tr style={{ backgroundColor: '#f0f0f0', borderBottom: '2px solid #ddd' }}>
-                    <th style={{ padding: '12px', textAlign: 'left' }}>Location</th>
-                    <th style={{ padding: '12px', textAlign: 'left' }}>Risk Level</th>
-                    <th style={{ padding: '12px', textAlign: 'left' }}>Accidents</th>
+              <table className={styles.table}>
+                <thead className={styles.tableHead}>
+                  <tr>
+                    <th className={styles.tableHeadCell}>Location</th>
+                    <th className={styles.tableHeadCell}>Risk Level</th>
+                    <th className={styles.tableHeadCell}>Incidents</th>
                   </tr>
                 </thead>
                 <tbody>
                   {hotspots.map((hs, idx) => (
-                    <tr key={idx} style={{ borderBottom: '1px solid #eee' }}>
-                      <td style={{ padding: '12px' }}>Lat: {hs.lat}, Lng: {hs.lng}</td>
-                      <td style={{ padding: '12px' }}>{hs.risk_level}</td>
-                      <td style={{ padding: '12px' }}>{hs.count}</td>
+                    <tr key={idx} className={styles.tableRow}>
+                      <td className={styles.tableCell}>📍 {hs.lat.toFixed(4)}, {hs.lng.toFixed(4)}</td>
+                      <td className={styles.tableCell}><span className={`${styles.statusChip} ${styles.chipDangerous}`}>{hs.risk_level}</span></td>
+                      <td className={styles.tableCell}><strong>{hs.count}</strong></td>
                     </tr>
                   ))}
                 </tbody>
               </table>
             )}
           </div>
-          <div style={{ backgroundColor: '#fff', padding: '20px', borderRadius: '15px', boxShadow: '0 4px 20px rgba(0,0,0,0.08)' }}>
-            <h2>⚠️ Active Alerts</h2>
+          <div className={styles.card}>
+            <h2 className={styles.cardTitle}>
+              <span className={styles.cardIcon}>⚠️</span>
+              Active Alerts
+            </h2>
             {alerts.length === 0 ? (
-              <p style={{ color: '#999' }}>No alerts in selected area</p>
+              <div className={styles.emptyState}>
+                <div className={styles.emptyStateIcon}>🛡️</div>
+                <p className={styles.emptyStateText}>No active alerts in your area.</p>
+              </div>
             ) : (
-              <table style={{ width: '100%', borderCollapse: 'collapse' }}>
-                <thead>
-                  <tr style={{ backgroundColor: '#f0f0f0', borderBottom: '2px solid #ddd' }}>
-                    <th style={{ padding: '12px', textAlign: 'left' }}>Alert</th>
-                    <th style={{ padding: '12px', textAlign: 'left' }}>Distance</th>
+              <table className={styles.table}>
+                <thead className={styles.tableHead}>
+                  <tr>
+                    <th className={styles.tableHeadCell}>Alert Type</th>
+                    <th className={styles.tableHeadCell}>Distance</th>
                   </tr>
                 </thead>
                 <tbody>
                   {alerts.map((alert, idx) => (
-                    <tr key={idx} style={{ borderBottom: '1px solid #eee' }}>
-                      <td style={{ padding: '12px' }}>{alert.name}</td>
-                      <td style={{ padding: '12px' }}>{alert.distance_km?.toFixed(2) || 'N/A'} km</td>
+                    <tr key={idx} className={styles.tableRow}>
+                      <td className={styles.tableCell}>⚡ {alert.name}</td>
+                      <td className={styles.tableCell}><strong>{alert.distance_km?.toFixed(2) || 'N/A'} km</strong></td>
                     </tr>
                   ))}
                 </tbody>
@@ -421,38 +536,35 @@ const AuthorityDashboard = () => {
       )}
 
       {/* Recent Reports */}
-      <section style={{ marginTop: '30px', backgroundColor: '#fff', padding: '20px', borderRadius: '15px', boxShadow: '0 4px 20px rgba(0,0,0,0.08)' }}>
-        <h3 style={{ marginTop: 0 }}>📋 Recent Accident Reports</h3>
+      <section className={styles.card} style={{ marginTop: '32px' }}>
+        <h3 className={styles.cardTitle}>
+          <span className={styles.cardIcon}>📋</span>
+          Recent Incident Reports
+        </h3>
         {reports.length === 0 ? (
-          <p style={{ color: '#999', textAlign: 'center', padding: '20px' }}>No reports yet</p>
+          <div className={styles.emptyState}>
+            <div className={styles.emptyStateIcon}>📊</div>
+            <p className={styles.emptyStateText}>No reports yet. Create one to get started.</p>
+          </div>
         ) : (
-          <table style={{ width: '100%', borderCollapse: 'collapse' }}>
-            <thead>
-              <tr style={{ backgroundColor: '#f0f0f0', borderBottom: '2px solid #ddd' }}>
-                <th style={{ padding: '12px', textAlign: 'left' }}>Report ID</th>
-                <th style={{ padding: '12px', textAlign: 'left' }}>Location</th>
-                <th style={{ padding: '12px', textAlign: 'left' }}>Severity</th>
-                <th style={{ padding: '12px', textAlign: 'left' }}>Time</th>
+          <table className={styles.table}>
+            <thead className={styles.tableHead}>
+              <tr>
+                <th className={styles.tableHeadCell}>Report ID</th>
+                <th className={styles.tableHeadCell}>Location</th>
+                <th className={styles.tableHeadCell}>Severity</th>
+                <th className={styles.tableHeadCell}>Time</th>
               </tr>
             </thead>
             <tbody>
               {reports.slice(0, 10).map(report => (
-                <tr key={report.report_id} style={{ borderBottom: '1px solid #eee' }}>
-                  <td style={{ padding: '12px' }}><strong>{report.report_id}</strong></td>
-                  <td style={{ padding: '12px' }}>{parseFloat(report.latitude).toFixed(4)}, {parseFloat(report.longitude).toFixed(4)}</td>
-                  <td style={{ padding: '12px' }}>
-                    <span style={{
-                      backgroundColor: report.severity === 'major' ? '#fed7d7' : report.severity === 'dangerous' ? '#fc8181' : '#feebc8',
-                      color: report.severity === 'major' ? '#c53030' : report.severity === 'dangerous' ? '#9b2c2c' : '#7c2d12',
-                      padding: '5px 10px',
-                      borderRadius: '5px',
-                      fontSize: '12px',
-                      fontWeight: 'bold'
-                    }}>
-                      {report.severity.toUpperCase()}
-                    </span>
+                <tr key={report.report_id} className={styles.tableRow}>
+                  <td className={styles.tableCell}><strong>#{report.report_id}</strong></td>
+                  <td className={styles.tableCell}>📍 {parseFloat(report.latitude).toFixed(4)}, {parseFloat(report.longitude).toFixed(4)}</td>
+                  <td className={styles.tableCell}>
+                    <StatusBadge severity={report.severity} />
                   </td>
-                  <td style={{ padding: '12px' }}>{new Date(report.accident_time).toLocaleString()}</td>
+                  <td className={styles.tableCell}>{new Date(report.accident_time).toLocaleString()}</td>
                 </tr>
               ))}
             </tbody>
@@ -461,8 +573,8 @@ const AuthorityDashboard = () => {
       </section>
 
       {/* Footer */}
-      <footer style={{ marginTop: '40px', textAlign: 'center', color: '#999', fontSize: '12px', borderTop: '1px solid #e0e0e0', paddingTop: '20px' }}>
-        <p>AcciNex - Predict, Prevent, Protect | Backend: 3000 | AI: 5000 | Dashboard: 3001</p>
+      <footer className={styles.footer}>
+        <p className={styles.footerText}>AcciNex - Predict, Prevent, Protect | Backend: 3000 | AI: 5000 | Dashboard: 3001</p>
       </footer>
     </div>
   );
